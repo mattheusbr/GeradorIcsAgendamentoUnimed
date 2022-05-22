@@ -2,5 +2,8 @@
 using AgendaUnimed;
 
 Console.WriteLine("Hello, World!");
-Scraping scraping = new Scraping();
-scraping.Main();
+
+    Scraping scraping = new Scraping();
+    Calendario calendario = new Calendario();
+    calendario.CriarInviteCalendario();
+    //scraping.Main();
