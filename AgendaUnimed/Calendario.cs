@@ -12,7 +12,7 @@ namespace AgendaUnimed
 {
     public class Calendario
     {
-        public void CriarInviteCalendario(CalendarEvent evento)
+        public void CriarInviteCalendario(List<CalendarEvent> evento)
         {
             var calendar = new Calendar();
             var reminder = new Alarm
@@ -29,8 +29,7 @@ namespace AgendaUnimed
                 Description = "Teste"                
             };
 
-            icalEvent.Alarms.Add(reminder);
-            calendar.Events.Add(icalEvent);
+
 
             var calendario = new CalendarSerializer().SerializeToString(calendar);
             File.WriteAllText(@"F:\calendar.ics", calendario);
