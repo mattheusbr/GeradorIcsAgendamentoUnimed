@@ -1,4 +1,5 @@
-﻿using Ical.Net;
+﻿using AgendaUnimed.Model;
+using Ical.Net;
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using Newtonsoft.Json;
@@ -14,23 +15,22 @@ namespace AgendaUnimed
 {
     internal class Scraping
     {
-        const string PATH = @"C:\git\AgendaUnimed\";
-        
+        private const string PATH_CHROMEDRIVE = @"C:\git\AgendaUnimed\";
+        private const string PATH_JSON_LOGIN = @"../../../Json/login.json";
+
         public void Main()
-        {           
+        {
             var options = new ChromeOptions();
-            options.AddArguments("--test-type", "--start-maximized");
-            options.AddArguments("--test-type", "--ignore-certificate-errors");
-            IWebDriver driver = new ChromeDriver(PATH, options);
+            options.AddArguments("--test-type", "--headless", "--ignore-certificate-errors");            
+            IWebDriver driver = new ChromeDriver(PATH_CHROMEDRIVE, options);
 
             try
             {
-                string url_agenda_com_data = @$"https://agendaonline.unimedmaringa.com.br/meus-agendamentos/de/{DateTime.Now:yyyy-MM-dd}/ate/{DateTime.Now.AddYears(1):yyyy-MM-dd}/situacao/agendado";
+                string url_agenda_com_data = @$"https://agendaonline.unimedmaringa.com.br/meus-agendamentos/de/{DateTime.Now:yyyy-MM-dd}/ate/{DateTime.Now.AddYears(1):yyyy-MM-dd}/situacao/todos";
                 List<CalendarEvent> calendarEvents = new List<CalendarEvent>();
                 
                 driver.Navigate().GoToUrl("https://agendaonline.unimedmaringa.com.br/");
                 driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(2);
-                //Thread.Sleep(1000);
 
                 var login = BusarLoginJson();
                 driver.FindElement(By.Name("cpf")).SendKeys(login.Usuario);
@@ -70,22 +70,28 @@ namespace AgendaUnimed
                         Trigger = new Trigger(TimeSpan.FromHours(-1))
                     };
 
-                    var icalEvent = new CalendarEvent
+                    var evento = new CalendarEvent
                     {
-                        Summary = "Consulta",
-                        Start = new CalDateTime(2022, 5, 22, 12, 0, 0),
-                        End = new CalDateTime(2022, 5, 22, 13, 0, 0),
-                        Description = "Teste"
+                        Summary = "Consulta " + descricao,
+                        Start = new CalDateTime(data),
+                        End = new CalDateTime(data.AddHours(1)),
+                        Description = "Sessão " + numeroConsulta
                     };
 
-                    icalEvent.Alarms.Add(reminder);
-                    calendarEvents.Add(icalEvent);
+                    evento.Alarms.Add(reminder);
+                    calendarEvents.Add(evento);
                 }
+
+                new Calendario().CriarInviteCalendario(calendarEvents);
+                Console.WriteLine("Finalizado");
             }
             catch (Exception e)
             {
                 Console.WriteLine("Erro ao gerar evento para o calendario: " + e.Message);
                 Console.ReadLine();
+            }
+            finally
+            {
                 if (driver != null)
                     driver.Dispose();
                 Environment.Exit(-1);
@@ -93,11 +99,11 @@ namespace AgendaUnimed
         }  
         
         private LoginModel BusarLoginJson()
-        {
-            
-            StreamReader r = new StreamReader("../../../login.json");
+        {            
+            StreamReader r = new StreamReader(PATH_JSON_LOGIN);
             string jsonString = r.ReadToEnd();
             return JsonConvert.DeserializeObject<LoginModel>(jsonString);
         }
+
     }
 }

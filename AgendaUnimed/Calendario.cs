@@ -10,29 +10,15 @@ using System.Threading.Tasks;
 
 namespace AgendaUnimed
 {
-    public class Calendario
+    internal class Calendario
     {
+        private const string PATH_ICS = @"F:\calendar.ics";
         public void CriarInviteCalendario(List<CalendarEvent> evento)
         {
-            var calendar = new Calendar();
-            var reminder = new Alarm
-            {
-                Action = AlarmAction.Audio,
-                Trigger = new Trigger(TimeSpan.FromHours(-1))
-            };
-
-            var icalEvent = new CalendarEvent
-            {
-                Summary = "Consulta",
-                Start = new CalDateTime(2022, 5, 22, 12, 0, 0),
-                End = new CalDateTime(2022, 5, 22, 13, 0, 0),
-                Description = "Teste"                
-            };
-
-
-
-            var calendario = new CalendarSerializer().SerializeToString(calendar);
-            File.WriteAllText(@"F:\calendar.ics", calendario);
+            Calendar calendar = new Calendar();
+            calendar.Events.AddRange(evento);
+            string calendario = new CalendarSerializer().SerializeToString(calendar);
+            File.WriteAllText(PATH_ICS, calendario);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AgendaUnimed
+namespace AgendaUnimed.Model
 {
     public class LoginModel
     {
